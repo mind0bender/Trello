@@ -7,7 +7,17 @@ const adapter = new PrismaPg(pool);
 
 const prisma = new PrismaClient({ adapter });
 
-async function main() {
+async function main(): Promise<void> {
+  // Clear DB to avoid duplicates
+  await prisma.cardMember.deleteMany();
+  await prisma.cardLabel.deleteMany();
+  await prisma.checklistItem.deleteMany();
+  await prisma.card.deleteMany();
+  await prisma.list.deleteMany();
+  await prisma.board.deleteMany();
+  await prisma.member.deleteMany();
+  await prisma.label.deleteMany();
+
   // 👤 Members
   const allMembers = await prisma.member.createManyAndReturn({
     data: [
