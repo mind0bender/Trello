@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Board {
+  id         String   @id @default(uuid())
+  title      String
+  background String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  lists List[]
+}
+
+model List {
+  id        String   @id @default(uuid())
+  title     String
+  position  Int
+  createdAt DateTime @default(now())
+
+  boardId String
+  board   Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+
+  cards Card[]
+
+  @@index([boardId])
+}
+
+model Card {
+  id          String    @id @default(uuid())
+  title       String
+  description String
+  position    Int
+  dueDate     DateTime?
+  createdAt   DateTime  @default(now())
+
+  listId String?
+  list   List?   @relation(fields: [listId], references: [id])
+
+  labels    CardLabel[]
+  members   CardMember[]
+  checklist ChecklistItem[]
+}
+
+model Member {
+  id    String       @id @default(uuid())
+  name  String
+  email String       @unique
+  cards CardMember[]
+}
+
+model Label {
+  id    String      @id @default(uuid())
+  name  String
+  color String
+  cards CardLabel[]
+}
+
+model CardMember {
+  cardId   String
+  memberId String
+
+  card   Card   @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@id([cardId, memberId])
+}
+
+model CardLabel {
+  cardId  String
+  labelId String
+
+  card  Card  @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  label Label @relation(fields: [labelId], references: [id], onDelete: Cascade)
+
+  @@id([cardId, labelId])
+}
+
+model ChecklistItem {
+  id       String  @id @default(uuid())
+  content  String
+  done     Boolean @default(false)
+  position Int
+  cardId   String
+  card     Card    @relation(fields: [cardId], references: [id])
+
+  @@index([cardId])
+}
