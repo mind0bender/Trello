@@ -7,7 +7,7 @@ type TaskProps = {
 };
 
 export function TaskCard({
-  card: { id, createdAt, title, listId, dueDate, description, position },
+  card: { id, title, description },
 }: TaskProps): JSX.Element {
   const { ref } = useDraggable({
     id,
