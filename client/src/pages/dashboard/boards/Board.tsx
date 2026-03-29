@@ -1,6 +1,6 @@
 import BoardView from "@/components/common/board/BoardView";
 import type { BoardFull } from "@/types";
-import { Grab, GripVertical } from "lucide-react";
+import { GripVertical } from "lucide-react";
 import { Suspense, type JSX } from "react";
 import { Await, useLoaderData } from "react-router-dom";
 
