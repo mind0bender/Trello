@@ -3,7 +3,7 @@ import helmet from "helmet";
 import cors from "cors";
 import rootRouter from "./routes";
 import httpLogger from "./middleware/logger.middleware";
-import { PORT } from "./utils/constants";
+import { IS_DEV, PORT } from "./utils/constants";
 import logger from "./lib/logger";
 import { errorHandler } from "./middleware/error.middleware";
 
@@ -14,7 +14,7 @@ app.use(helmet());
 app.use(express.json());
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: IS_DEV ? "http://localhost:5173" : "https://trello-m0b.vercel.app",
     credentials: true,
   }),
 );
