@@ -1,4 +1,4 @@
-import type { BoardFull, List, ListWithCards } from "@/types";
+import type { BoardFull, ListWithCards } from "@/types";
 import { useFetcher } from "react-router-dom";
 import { useCallback, useMemo, useState, type JSX } from "react";
 import ListView from "../list/ListView";
@@ -6,8 +6,11 @@ import { createPortal } from "react-dom";
 import {
   DndContext,
   DragOverlay,
+  useSensor,
+  useSensors,
   type DragEndEvent,
   type DragStartEvent,
+  PointerSensor,
 } from "@dnd-kit/core";
 import { arrayMove, SortableContext } from "@dnd-kit/sortable";
 
@@ -29,6 +32,14 @@ const BoardView = ({ board }: { board: BoardFull }): JSX.Element => {
   }, []);
 
   const fetcher = useFetcher();
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 4,
+      },
+    }),
+  );
 
   const dragEndHandler = useCallback(
     (e: DragEndEvent): void => {
@@ -71,7 +82,11 @@ const BoardView = ({ board }: { board: BoardFull }): JSX.Element => {
       <div>
         <h1 className="text-xl font-semibold px-4 py-4">{board.title}</h1>
       </div>
-      <DndContext onDragStart={dragStartHandler} onDragEnd={dragEndHandler}>
+      <DndContext
+        sensors={sensors}
+        onDragStart={dragStartHandler}
+        onDragEnd={dragEndHandler}
+      >
         <div className="flex gap-4 px-4">
           <SortableContext items={listIds}>
             {lists.map(
@@ -82,7 +97,7 @@ const BoardView = ({ board }: { board: BoardFull }): JSX.Element => {
           </SortableContext>
         </div>
         {createPortal(
-          <DragOverlay>
+          <DragOverlay modifiers={[]}>
             {activeList && <ListView list={activeList} />}
           </DragOverlay>,
           document.body,

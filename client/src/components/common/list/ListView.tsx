@@ -4,7 +4,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import type { Card, ListWithCards } from "@/types";
 import { TaskCard } from "../task/Task";
 import { CSS } from "@dnd-kit/utilities";
-import { Grab } from "lucide-react";
+import { Grab, GripVertical } from "lucide-react";
 
 interface ListViewProps {
   list: ListWithCards;
@@ -13,6 +13,7 @@ interface ListViewProps {
 const ListView = ({ list }: ListViewProps): JSX.Element => {
   const { id, cards, title, boardId, position } = list;
   const {
+    setActivatorNodeRef,
     setNodeRef,
     attributes,
     listeners,
@@ -53,13 +54,18 @@ const ListView = ({ list }: ListViewProps): JSX.Element => {
   return (
     <div
       style={style}
-      {...attributes}
-      {...listeners}
       ref={setNodeRef}
-      className="flex w-80 flex-col rounded-lg border border-neutral-900 bg-neutral-900/80 p-4"
+      className="flex w-80 flex-col rounded-lg border border-neutral-900 bg-neutral-900/80 p-4 touch-none"
       id={boardId}
     >
-      <h2 className="mb-4 font-semibold text-neutral-100">{title}</h2>
+      <h2 className="mb-4 font-semibold text-neutral-100 flex justify-between items-center">
+        {title}
+        <div ref={setActivatorNodeRef} {...listeners} {...attributes}>
+          <GripVertical
+            className={`${isDragging ? "text-stone-300" : "text-stone-500"}`}
+          />
+        </div>
+      </h2>
       <div ref={droppableRef} className="flex flex-1 flex-col gap-4">
         {cards.map((card: Card): JSX.Element => {
           return <TaskCard key={card.id} card={card} />;
