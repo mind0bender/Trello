@@ -11,6 +11,7 @@ export function TaskCard({
 }: TaskProps): JSX.Element {
   const { ref } = useDraggable({
     id,
+    type: "card",
   });
 
   return (
