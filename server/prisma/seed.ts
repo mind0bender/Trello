@@ -43,7 +43,8 @@ async function main(): Promise<void> {
   const board = await prisma.board.create({
     data: {
       title: "Project Alpha",
-      background: "gradient-blue",
+      background:
+        "https://images.pexels.com/photos/13382071/pexels-photo-13382071.jpeg",
     },
   });
 

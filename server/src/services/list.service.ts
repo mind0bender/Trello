@@ -62,6 +62,32 @@ export const listService = {
     });
   },
 
+  async swapLists({
+    list1Id,
+    list2Id,
+    boardId,
+  }: {
+    list1Id: string;
+    boardId: string;
+    list2Id: string;
+  }): Promise<List> {
+    const newPosition: number | undefined = (
+      await prisma.list.findUnique({
+        where: {
+          id: list2Id,
+        },
+      })
+    )?.position;
+
+    if (!newPosition) throw new Error("List not found");
+
+    return await this.moveList({
+      listId: list1Id,
+      boardId,
+      newPosition,
+    });
+  },
+
   async moveList(params: {
     listId: string;
     boardId: string;

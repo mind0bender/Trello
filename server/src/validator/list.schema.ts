@@ -15,6 +15,12 @@ export const updateListSchema = z
     message: "At least one field must be provided",
   });
 
+export const swapListSchema = z.object({
+  list1Id: id,
+  boardId: id,
+  list2Id: id,
+});
+
 export const moveListSchema = z.object({
   listId: id,
   boardId: id,

@@ -4,26 +4,51 @@ import { useSortable } from "@dnd-kit/sortable";
 import type { Card, ListWithCards } from "@/types";
 import { TaskCard } from "../task/Task";
 import { CSS } from "@dnd-kit/utilities";
+import { Grab } from "lucide-react";
 
 interface ListViewProps {
   list: ListWithCards;
 }
 
-const ListView = ({
-  list: { id, cards, title, boardId },
-}: ListViewProps): JSX.Element => {
-  const { setNodeRef, attributes, listeners, transform, transition } =
-    useSortable({ id });
-
-  const style = {
+const ListView = ({ list }: ListViewProps): JSX.Element => {
+  const { id, cards, title, boardId, position } = list;
+  const {
+    setNodeRef,
+    attributes,
+    listeners,
+    transform,
     transition,
-    transform: CSS.Transform.toString(transform),
-  };
+    isDragging,
+  } = useSortable({
+    id,
+    data: {
+      type: "list",
+      list,
+      position,
+      boardId,
+    },
+  });
 
   const { ref: droppableRef } = useDroppable({
     id: id,
     type: "card",
   });
+
+  const style = {
+    transition,
+    transform: CSS.Translate.toString(transform),
+  };
+
+  if (isDragging)
+    return (
+      <div
+        ref={setNodeRef}
+        className="flex justify-center items-center w-80 flex-col rounded-lg border bg-neutral-900/80 p-4 border-blue-400/80"
+        id={boardId}
+      >
+        <Grab size={40} className="text-neutral-500" />
+      </div>
+    );
 
   return (
     <div

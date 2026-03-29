@@ -48,6 +48,13 @@ export const listController = {
     return res.json(successResponse(null));
   },
 
+  async swapList(
+    req: Request,
+    res: Response,
+  ): Promise<Response<ApiResponse<List>>> {
+    const list = await listService.swapLists(req.body);
+    return res.json(successResponse(list));
+  },
   async moveList(
     req: Request,
     res: Response,

@@ -7,6 +7,7 @@ import {
   moveListSchema,
   listIdParamSchema,
   boardIdParamSchema,
+  swapListSchema,
 } from "../validator/list.schema";
 import { validate } from "../middleware/validate.middleware";
 
@@ -35,6 +36,12 @@ router.delete(
   "/lists/:id",
   validate(listIdParamSchema, "params"),
   asyncHandler(listController.deleteList),
+);
+
+router.post(
+  "/lists/swap",
+  validate(swapListSchema),
+  asyncHandler(listController.swapList),
 );
 
 router.post(
