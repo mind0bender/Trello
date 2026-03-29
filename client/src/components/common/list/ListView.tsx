@@ -62,7 +62,7 @@ const ListView = ({ list }: ListViewProps): JSX.Element => {
         {title}
         <div ref={setActivatorNodeRef} {...listeners} {...attributes}>
           <GripVertical
-            className={`${isDragging ? "text-stone-300" : "text-stone-500"}`}
+            className={`cursor-grab active:cursor-grabbing ${isDragging ? "text-stone-300" : "text-stone-500"}`}
           />
         </div>
       </h2>

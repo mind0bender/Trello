@@ -1,5 +1,6 @@
 import BoardView from "@/components/common/board/BoardView";
 import type { BoardFull } from "@/types";
+import { Grab, GripVertical } from "lucide-react";
 import { Suspense, type JSX } from "react";
 import { Await, useLoaderData } from "react-router-dom";
 
@@ -8,7 +9,7 @@ const BoardPage = (): JSX.Element => {
     board: BoardFull;
   };
   return (
-    <Suspense fallback={<div>Loading board...</div>}>
+    <Suspense fallback={<BoardPageSkeleton />}>
       <Await resolve={board}>
         {(resolvedBoard: BoardFull): JSX.Element => (
           <BoardView board={resolvedBoard} />
@@ -17,5 +18,44 @@ const BoardPage = (): JSX.Element => {
     </Suspense>
   );
 };
+
+function BoardPageSkeleton(): JSX.Element {
+  return (
+    <div className="w-full flex flex-col grow">
+      <div>
+        <h1 className="text-xl font-semibold px-4 py-4">Loading Board...</h1>
+      </div>
+      <div className="flex gap-4 px-4">
+        {[1, 2, 3].map(
+          (list: number): JSX.Element => (
+            <div
+              key={list}
+              style={{
+                animationDelay: `${list / 3}s`,
+              }}
+              className="flex gap-4 justify-center items-center w-80 flex-col rounded-lg border bg-neutral-900/80 p-4 border-neutral-400/80 animate-pulse"
+            >
+              <h2 className="w-full mb-4 font-semibold text-neutral-100 flex justify-between items-center">
+                <span>Loading List...</span>
+                <GripVertical
+                  className={`cursor-grab active:cursor-grabbing text-stone-500`}
+                />
+              </h2>
+              {[1, 2, 3].map((): JSX.Element => {
+                return (
+                  <div className="cursor-grab rounded-lg bg-neutral-900 border border-neutral-700 p-4 shadow-sm hover:shadow-md w-full">
+                    <h3 className="font-medium text-neutral-100">
+                      Loading Cards...
+                    </h3>
+                  </div>
+                );
+              })}
+            </div>
+          ),
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default BoardPage;

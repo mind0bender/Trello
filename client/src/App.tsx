@@ -1,5 +1,5 @@
 import { type JSX } from "react";
-import { createBrowserRouter, RouterProvider } from "react-router";
+import { createBrowserRouter, Navigate, RouterProvider } from "react-router";
 import RootLayout from "./components/layout/rootLayout";
 import Dashboard from "./pages/dashboard/Dashboard";
 import Boards from "./pages/dashboard/boards/Boards";
@@ -17,6 +17,10 @@ const router = createBrowserRouter([
       {
         element: <Dashboard />,
         children: [
+          {
+            index: true,
+            element: <Navigate to={"/boards"} />,
+          },
           {
             loader: boardsLoader,
             action: createBoardAction,
