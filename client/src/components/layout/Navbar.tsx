@@ -13,8 +13,8 @@ const Navbar = (): JSX.Element => {
       <div className="flex gap-2 justify-center items-center">
         <LayoutGrid size={20} />
 
-        <div className="bg-blue-600 rounded-sm">
-          <Kanban />
+        <div className="bg-blue-600 rounded-sm p-1">
+          <Kanban size={20} />
         </div>
         <h2 className="font-bold text-neutral-100">Trello</h2>
       </div>
@@ -24,7 +24,6 @@ const Navbar = (): JSX.Element => {
           <InputGroupAddon>
             <Search />
           </InputGroupAddon>
-          <InputGroupAddon align="inline-end">12 results</InputGroupAddon>
         </InputGroup>
         <Button className="bg-blue-500 text-neutral-900">Create</Button>
       </div>

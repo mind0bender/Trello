@@ -13,7 +13,7 @@ export const boardLoader: LoaderFunction = ({
   }
 
   const boardPromise = api
-    .get<ApiResponse<BoardFull>>(`/api/boards/${boardId}`)
+    .get<ApiResponse<BoardFull>>(`/api/boards/${boardId}/full`)
     .then((res: AxiosResponse<ApiResponse<BoardFull>>): BoardFull => {
       if (!res.data.success) {
         throw new Error(res.data.message);

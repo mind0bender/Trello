@@ -1,3 +1,4 @@
+import BoardView from "@/components/common/board/BoardView";
 import type { BoardFull } from "@/types";
 import { Suspense, type JSX } from "react";
 import { Await, useLoaderData } from "react-router-dom";
@@ -10,7 +11,7 @@ const BoardPage = (): JSX.Element => {
     <Suspense fallback={<div>Loading board...</div>}>
       <Await resolve={board}>
         {(resolvedBoard: BoardFull): JSX.Element => (
-          <div>{JSON.stringify(resolvedBoard)}</div>
+          <BoardView board={resolvedBoard} />
         )}
       </Await>
     </Suspense>
