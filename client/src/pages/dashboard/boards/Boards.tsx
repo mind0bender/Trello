@@ -7,7 +7,7 @@ import { Form, useNavigation } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import type { boardsLoader } from "@/routes/board.loader";
+import type { boardsLoader } from "@/routes/boards.loader";
 
 const Boards = (): JSX.Element => {
   const { boards } = useLoaderData<typeof boardsLoader>();

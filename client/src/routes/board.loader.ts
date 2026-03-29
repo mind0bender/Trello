@@ -1,15 +1,27 @@
-import type { Board } from "@/types";
-import { api } from "../libs/api/axios";
+import { api } from "@/libs/api/axios";
+import type { ApiResponse, BoardFull } from "@/types";
 import type { AxiosResponse } from "axios";
+import type { LoaderFunction, LoaderFunctionArgs } from "react-router";
 
-export const boardsLoader = (): { boards: Promise<Board[]> } => {
-  try {
-    const boardsPromise = api
-      .get("/api/boards")
-      .then((res: AxiosResponse): Board[] => res.data.data);
+export const boardLoader: LoaderFunction = ({
+  params,
+}: LoaderFunctionArgs): { board: Promise<BoardFull> } => {
+  const { boardId } = params;
 
-    return { boards: boardsPromise };
-  } catch {
-    throw new Response("Failed to load boards", { status: 500 });
+  if (!boardId) {
+    throw new Response("Board ID missing", { status: 400 });
   }
+
+  const boardPromise = api
+    .get<ApiResponse<BoardFull>>(`/api/boards/${boardId}`)
+    .then((res: AxiosResponse<ApiResponse<BoardFull>>): BoardFull => {
+      if (!res.data.success) {
+        throw new Error(res.data.message);
+      }
+      return res.data.data;
+    });
+
+  return {
+    board: boardPromise,
+  };
 };

@@ -5,7 +5,7 @@ import { baseURL } from "../constants";
 export const api = axios.create({
   baseURL: baseURL,
   withCredentials: true,
-  validateStatus: (status) => true,
+  validateStatus: () => true,
 });
 
 export async function request<T>(promise: Promise<{ data: ApiResponse<T> }>) {
