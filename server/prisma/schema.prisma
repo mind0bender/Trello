@@ -22,6 +22,7 @@ model List {
   title     String
   position  Int
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   boardId String
   board   Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
@@ -34,13 +35,14 @@ model List {
 model Card {
   id          String    @id @default(uuid())
   title       String
-  description String
+  description String?
   position    Int
   dueDate     DateTime?
   createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  listId String?
-  list   List?   @relation(fields: [listId], references: [id])
+  listId String
+  list   List   @relation(fields: [listId], references: [id], onDelete: Cascade)
 
   labels    CardLabel[]
   members   CardMember[]
