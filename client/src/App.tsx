@@ -10,6 +10,7 @@ import BoardPage from "./pages/dashboard/boards/Board";
 
 const router = createBrowserRouter([
   {
+    path: "/",
     element: <RootLayout />,
     children: [
       {
