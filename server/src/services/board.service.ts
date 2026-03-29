@@ -1,6 +1,7 @@
 import type { Board } from "../generated/prisma/client";
 import type { BoardGetPayload } from "../generated/prisma/models";
 import prisma from "../lib/db";
+import logger from "../lib/logger";
 import type { FullBoard } from "../types";
 
 export const boardService = {
@@ -8,6 +9,7 @@ export const boardService = {
     title: string;
     background?: string;
   }): Promise<Board> {
+    logger.info({ data });
     return prisma.board.create({
       data,
     });
