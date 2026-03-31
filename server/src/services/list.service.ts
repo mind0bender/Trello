@@ -1,5 +1,7 @@
 import type { List } from "../generated/prisma/client";
 import prisma from "../lib/db";
+import logger from "../lib/logger";
+import { listIdParamSchema } from "../validator/list.schema";
 
 export const listService = {
   async createList(data: { title: string; boardId: string }): Promise<List> {
@@ -43,6 +45,7 @@ export const listService = {
       });
 
       if (!list) throw new Error("List not found");
+      logger.debug(listId);
 
       await tx.list.delete({
         where: { id: listId },
@@ -80,6 +83,7 @@ export const listService = {
     )?.position;
 
     if (!newPosition) throw new Error("List not found");
+    logger.debug(list1Id);
 
     return await this.moveList({
       listId: list1Id,
@@ -101,6 +105,7 @@ export const listService = {
       });
 
       if (!list) throw new Error("List not found");
+      logger.debug(listId);
 
       const oldPosition = list.position;
 

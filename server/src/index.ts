@@ -2,10 +2,10 @@ import express, { type Application } from "express";
 import helmet from "helmet";
 import cors from "cors";
 import rootRouter from "./routes";
-import httpLogger from "./middleware/logger.middleware";
 import { IS_DEV, PORT } from "./utils/constants";
 import logger from "./lib/logger";
 import { errorHandler } from "./middleware/error.middleware";
+import morgan from "morgan";
 
 const app: Application = express();
 
@@ -18,7 +18,7 @@ app.use(
     credentials: true,
   }),
 );
-app.use(httpLogger);
+app.use(morgan("dev"));
 app.use(errorHandler);
 
 // API routes

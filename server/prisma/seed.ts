@@ -5,6 +5,8 @@ import pg from "pg";
 const pool = new pg.Pool({
   connectionString: process.env.DATABASE_URL,
   max: 10,
+  connectionTimeoutMillis: 5000,
+  idleTimeoutMillis: 30000,
 });
 const adapter = new PrismaPg(pool);
 
@@ -99,6 +101,15 @@ async function main(): Promise<void> {
       description: "Normalize relations and optimize queries",
       position: 1,
       listId: done.id,
+    },
+  });
+
+  await prisma.card.create({
+    data: {
+      title: "This is a test task",
+      description: "Do something very ultimately usefull",
+      position: 2,
+      listId: todo.id,
     },
   });
 

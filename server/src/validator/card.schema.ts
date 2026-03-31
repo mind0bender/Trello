@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const id = z.string().uuid();
+const id = z.uuid();
 
 export const createCardSchema = z.object({
   title: z.string().trim().min(1).max(200),
@@ -26,14 +26,9 @@ export const updateCardSchema = z
 
 export const moveCardSchema = z.object({
   cardId: id,
-  source: z.object({
-    listId: id,
-    position: z.number().int().min(1),
-  }),
-  destination: z.object({
-    listId: id,
-    position: z.number().int().min(1),
-  }),
+  sourceListId: id,
+  destListId: id,
+  newPosition: z.number().int().min(1),
 });
 
 export const addMemberSchema = z.object({

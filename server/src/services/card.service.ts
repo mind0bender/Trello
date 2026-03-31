@@ -6,6 +6,7 @@ import type {
 } from "../generated/prisma/client";
 import type { Card$labelsArgs } from "../generated/prisma/models";
 import prisma from "../lib/db";
+import logger from "../lib/logger";
 
 const cardService = {
   async createCard({
@@ -76,75 +77,81 @@ const cardService = {
     destListId: string;
     newPosition: number;
   }): Promise<Card> {
-    return prisma.$transaction(async (tx) => {
-      const card: Card | null = await tx.card.findUnique({
-        where: { id: cardId },
-      });
-      if (!card) throw new Error("Card not found");
+    return prisma.$transaction(
+      async (tx) => {
+        const card: Card | null = await tx.card.findUnique({
+          where: { id: cardId },
+        });
+        if (!card) throw new Error("Card not found");
 
-      const oldPosition: number = card.position;
+        const oldPosition: number = card.position;
 
-      if (sourceListId === destListId) {
-        if (newPosition > oldPosition) {
+        if (sourceListId === destListId) {
+          if (newPosition > oldPosition) {
+            await tx.card.updateMany({
+              where: {
+                listId: sourceListId,
+                position: {
+                  gt: oldPosition,
+                  lte: newPosition,
+                },
+              },
+              data: {
+                position: { decrement: 1 },
+              },
+            });
+          } else {
+            await tx.card.updateMany({
+              where: {
+                listId: sourceListId,
+                position: { gte: newPosition, lt: oldPosition },
+              },
+              data: {
+                position: {
+                  increment: 1,
+                },
+              },
+            });
+          }
+        } else {
           await tx.card.updateMany({
             where: {
               listId: sourceListId,
-              position: {
-                gt: oldPosition,
-                lte: newPosition,
-              },
+              position: { gt: oldPosition },
             },
             data: {
               position: { decrement: 1 },
             },
           });
-        } else {
+
           await tx.card.updateMany({
             where: {
-              listId: sourceListId,
-              position: { gte: newPosition, lt: oldPosition },
+              listId: destListId,
+              position: {
+                gte: newPosition,
+              },
             },
             data: {
-              position: {
-                increment: 1,
-              },
+              position: { increment: 1 },
             },
           });
         }
-      } else {
-        await tx.card.updateMany({
+
+        return tx.card.update({
           where: {
-            listId: sourceListId,
-            position: { gt: oldPosition },
+            id: cardId,
           },
           data: {
-            position: { decrement: 1 },
-          },
-        });
-
-        await tx.card.updateMany({
-          where: {
             listId: destListId,
-            position: {
-              gte: newPosition,
-            },
-          },
-          data: {
-            position: { increment: 1 },
+            position: newPosition,
           },
         });
-      }
-
-      return tx.card.update({
-        where: {
-          id: cardId,
-        },
-        data: {
-          listId: destListId,
-          position: newPosition,
-        },
-      });
-    });
+      },
+      {
+        maxWait: 5000,
+        timeout: 10000,
+      },
+    );
   },
 
   async addMember(cardId: string, memberId: string): Promise<CardMember> {

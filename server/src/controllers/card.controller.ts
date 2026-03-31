@@ -2,6 +2,9 @@ import type { Request, Response } from "express";
 import { successResponse, type ApiResponse } from "../utils/response";
 import type { Card } from "../generated/prisma/client";
 import cardService from "../services/card.service";
+import logger from "../lib/logger";
+import type z from "zod";
+import type { moveCardSchema } from "../validator/card.schema";
 
 type CardIdParam = { id: string };
 type ListIdParam = { listId: string };
@@ -53,7 +56,6 @@ export const cardController = {
     res: Response,
   ): Promise<Response<ApiResponse<Card>>> {
     const card = await cardService.moveCard(req.body);
-
     return res.json(successResponse(card));
   },
 
