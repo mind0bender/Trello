@@ -1,4 +1,4 @@
-import { api } from "@/libs/api/axios";
+import { api } from "@/lib/api/axios";
 import type { ApiResponse, BoardFull } from "@/types";
 import type { AxiosResponse } from "axios";
 import type { LoaderFunction, LoaderFunctionArgs } from "react-router";

@@ -1,5 +1,5 @@
 import { type ActionFunctionArgs, redirect } from "react-router-dom";
-import { createBoard } from "../libs/api/boards";
+import { createBoard } from "../lib/api/boards";
 
 export async function createBoardAction({ request }: ActionFunctionArgs) {
   const formData = await request.formData();

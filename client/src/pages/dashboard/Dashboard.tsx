@@ -1,6 +1,6 @@
 import { FolderKanban, Users } from "lucide-react";
 import type { JSX } from "react";
-import { NavLink, Outlet } from "react-router";
+import { NavLink, Outlet, type NavLinkRenderProps } from "react-router";
 
 const Dashboard = (): JSX.Element => {
   return (
@@ -10,7 +10,7 @@ const Dashboard = (): JSX.Element => {
         <ul className="flex flex-col gap-2 justify-start items-start">
           <li className="flex w-full justify-start">
             <NavLink
-              className={({ isActive }): string =>
+              className={({ isActive }: NavLinkRenderProps): string =>
                 `flex gap-2 justify-start items-center grow px-2 sm:pr-10 py-1.5 rounded-md ${isActive && "bg-blue-500/20 text-blue-400"}`
               }
               to={"/boards"}
@@ -21,7 +21,7 @@ const Dashboard = (): JSX.Element => {
           </li>
           <li className="flex w-full justify-start">
             <NavLink
-              className={({ isActive }): string =>
+              className={({ isActive }: NavLinkRenderProps): string =>
                 `flex gap-2 justify-start items-center grow px-2 sm:pr-10 py-1.5 rounded-md ${isActive && "bg-blue-500/20 text-blue-400"}`
               }
               to={"/members"}

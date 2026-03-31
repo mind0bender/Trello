@@ -7,7 +7,7 @@ import { boardsLoader } from "./routes/boards.loader";
 import { createBoardAction } from "./routes/boards.action";
 import { boardLoader } from "./routes/board.loader";
 import BoardPage from "./pages/dashboard/boards/Board";
-import { swapListsAction } from "./routes/list.action";
+import { swapListOrCardAction } from "./routes/board.action";
 
 const router = createBrowserRouter([
   {
@@ -33,7 +33,7 @@ const router = createBrowserRouter([
         path: "/boards/:boardId",
         element: <BoardPage />,
         loader: boardLoader,
-        action: swapListsAction,
+        action: swapListOrCardAction,
       },
     ],
   },

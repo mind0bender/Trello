@@ -1,5 +1,5 @@
-import type { BoardFull, ListWithCards } from "@/types";
-import { useFetcher } from "react-router-dom";
+import type { BoardFull, Card, ListWithCards } from "@/types";
+import { Form, useFetcher, useNavigation } from "react-router-dom";
 import { useCallback, useMemo, useState, type JSX } from "react";
 import ListView from "../list/ListView";
 import { createPortal } from "react-dom";
@@ -11,8 +11,19 @@ import {
   type DragEndEvent,
   type DragStartEvent,
   PointerSensor,
+  closestCorners,
+  defaultDropAnimation,
+  type DropAnimation,
 } from "@dnd-kit/core";
-import { arrayMove, SortableContext } from "@dnd-kit/sortable";
+import {
+  arrayMove,
+  horizontalListSortingStrategy,
+  SortableContext,
+} from "@dnd-kit/sortable";
+import { Card as ShadCard } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { TaskCard } from "../task/Task";
 
 const BoardView = ({ board }: { board: BoardFull }): JSX.Element => {
   const [lists, setLists] = useState<ListWithCards[]>(board.lists);
@@ -24,14 +35,22 @@ const BoardView = ({ board }: { board: BoardFull }): JSX.Element => {
     [lists],
   );
 
+  const [isListDraggable, setIsListDraggable] = useState<boolean>(false);
+  const [isCardDraggable, setIsCardDraggable] = useState<boolean>(false);
+  const [activeCard, setActiveCard] = useState<Card | null>(null);
+
   const dragStartHandler = useCallback((e: DragStartEvent): void => {
-    console.log(e);
     if (e.active.data.current?.type === "list") {
+      setIsListDraggable(true);
       setActiveList(e.active.data.current.list);
+    } else if (e.active.data.current?.type === "card") {
+      setIsCardDraggable(true);
+      setActiveCard(e.active.data.current.card);
     }
   }, []);
 
-  const fetcher = useFetcher();
+  const moveListFetcher = useFetcher();
+  const moveCardFetcher = useFetcher();
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -41,70 +60,280 @@ const BoardView = ({ board }: { board: BoardFull }): JSX.Element => {
     }),
   );
 
+  const findContainer = useCallback(
+    (id: string): string => {
+      const list: ListWithCards = lists.find((l: ListWithCards): boolean => {
+        if (l.id === id) return true;
+        return l.cards.some((c: Card): boolean => c.id === id);
+      }) as ListWithCards;
+      return list.id;
+    },
+    [lists],
+  );
+
   const dragEndHandler = useCallback(
     (e: DragEndEvent): void => {
       const { active, over } = e;
 
       if (!over) return;
 
-      const activeListId = active.id;
-      const overListId = over.id;
+      if (active.data.current!.type === "list") {
+        const activeListId = active.id;
+        const overListId = over.data.current?.listId || over.id;
 
-      if (activeListId === overListId) return;
+        setIsListDraggable(false);
+        if (activeListId === overListId) return;
 
-      const formData = new FormData();
-      formData.append("list1Id", String(activeListId));
-      formData.append("list2Id", String(overListId));
-      formData.append("boardId", String(board.id));
+        const formData = new FormData();
+        formData.append("list1Id", String(activeListId));
+        formData.append("list2Id", String(overListId));
+        formData.append("boardId", String(board.id));
+        formData.append("intent", String("move-list"));
 
-      fetcher.submit(formData, {
-        method: "post",
-      });
+        moveListFetcher.submit(formData, {
+          method: "post",
+        });
 
-      setLists((prevLists: ListWithCards[]): ListWithCards[] => {
-        const oldIndex = prevLists.findIndex(
-          (l: ListWithCards): boolean => l.id === active.id,
-        );
-        const newIndex = prevLists.findIndex(
-          (l: ListWithCards): boolean => l.id === over.id,
-        );
+        setLists((prevLists: ListWithCards[]): ListWithCards[] => {
+          const oldIndex = prevLists.findIndex(
+            (l: ListWithCards): boolean => l.id === active.id,
+          );
+          const newIndex = prevLists.findIndex(
+            (l: ListWithCards): boolean => l.id === over.id,
+          );
 
-        if (oldIndex === -1 || newIndex === -1) return prevLists;
+          if (oldIndex === -1 || newIndex === -1) return prevLists;
 
-        return arrayMove(prevLists, oldIndex, newIndex);
-      });
+          return arrayMove(prevLists, oldIndex, newIndex);
+        });
+      } else if (active.data.current?.type === "card") {
+        setIsCardDraggable(false);
+        if (!over) return;
+
+        if (active.data.current?.type !== "card") return;
+
+        const activeContainer: string = findContainer(active.id as string);
+        const overContainer: string = findContainer(over.id as string);
+
+        const cardId: string = active.data.current?.cardId;
+        const sourceListId: string = activeContainer;
+        const destinationListId: string = overContainer;
+        const newPosition: number =
+          over.data.current?.type === "card"
+            ? over.data.current?.position
+            : (lists.find(
+                (l: ListWithCards): boolean => l.id === destinationListId,
+              )?.cards.length || 0) + 1;
+
+        const destination: {
+          listId: string;
+          position: number;
+        } = {
+          listId: over.data.current?.listId,
+          position:
+            over.data.current?.type === "card"
+              ? over.data.current?.position - 1
+              : over.data.current?.list.cards.length,
+        };
+
+        console.table({ over, destination });
+
+        setLists((prev: ListWithCards[]): ListWithCards[] => {
+          const sourceListIndex = prev.findIndex(
+            (l: ListWithCards): boolean => l.id === activeContainer,
+          );
+          const destListIndex = prev.findIndex(
+            (l: ListWithCards): boolean => l.id === overContainer,
+          );
+
+          if (sourceListIndex === -1 || destListIndex === -1) return prev;
+
+          const sourceList = prev[sourceListIndex];
+          const destList = prev[destListIndex];
+
+          const sourceCards = [...sourceList.cards];
+          const destCards =
+            sourceListIndex === destListIndex
+              ? sourceCards
+              : [...destList.cards];
+
+          const fromIndex = sourceCards.findIndex(
+            (c: Card): boolean => c.id === cardId,
+          );
+          if (fromIndex === -1) return prev;
+
+          const [movedCard] = sourceCards.splice(fromIndex, 1);
+
+          let toIndex = destination.position;
+
+          if (toIndex === undefined || toIndex === null) {
+            toIndex = destCards.length;
+          }
+
+          if (sourceListIndex === destListIndex) {
+            if (sourceListIndex === destListIndex) {
+              const list = prev[sourceListIndex];
+              const cards = [...list.cards];
+
+              const fromIndex = cards.findIndex(
+                (c: Card): boolean => c.id === cardId,
+              );
+              if (fromIndex === -1) return prev;
+              let toIndex = destination.position;
+
+              if (toIndex === undefined || toIndex === null) {
+                toIndex = cards.length - 1;
+              }
+
+              return prev.map((l: ListWithCards, i: number): ListWithCards => {
+                if (i !== sourceListIndex) return l;
+
+                return {
+                  ...l,
+                  cards: arrayMove(cards, fromIndex, toIndex),
+                };
+              });
+            }
+          }
+
+          destCards.splice(toIndex, 0, movedCard);
+
+          return prev.map((list: ListWithCards, i: number): ListWithCards => {
+            if (i === sourceListIndex) {
+              return { ...list, cards: sourceCards };
+            }
+            if (i === destListIndex) {
+              return { ...list, cards: destCards };
+            }
+            return list;
+          });
+        });
+        const formData: FormData = new FormData();
+        formData.append("cardId", cardId);
+        formData.append("sourceListId", sourceListId);
+        formData.append("destListId", destinationListId);
+        formData.append("newPosition", String(newPosition));
+        formData.append("intent", String("move-card"));
+
+        moveCardFetcher.submit(formData, {
+          method: "POST",
+        });
+      }
     },
-    [board.id, fetcher],
+    [board.id, moveListFetcher, moveCardFetcher, findContainer, lists],
   );
 
+  const dropAnimation: DropAnimation = {
+    ...defaultDropAnimation,
+  };
+
   return (
-    <div className="w-full flex flex-col grow">
+    <div className="w-full flex flex-col grow bg-linear-135 from-blue-800 to-blue-400">
       <div>
         <h1 className="text-xl font-semibold px-4 py-4">{board.title}</h1>
       </div>
-      <DndContext
-        sensors={sensors}
-        onDragStart={dragStartHandler}
-        onDragEnd={dragEndHandler}
-      >
-        <div className="flex gap-4 px-4">
-          <SortableContext items={listIds}>
-            {lists.map(
-              (list: ListWithCards): JSX.Element => (
-                <ListView list={list} key={list.id} />
-              ),
-            )}
-          </SortableContext>
-        </div>
-        {createPortal(
-          <DragOverlay modifiers={[]}>
-            {activeList && <ListView list={activeList} />}
-          </DragOverlay>,
-          document.body,
-        )}
-      </DndContext>
+      <div className="overflow-x-auto grow flex">
+        <DndContext
+          sensors={sensors}
+          onDragStart={dragStartHandler}
+          onDragEnd={dragEndHandler}
+          collisionDetection={closestCorners}
+        >
+          <div className="flex gap-4 px-4 grow">
+            <SortableContext
+              items={listIds}
+              strategy={horizontalListSortingStrategy}
+            >
+              <div className="flex gap-4 h-fit">
+                {lists.map(
+                  (list: ListWithCards): JSX.Element => (
+                    <ListView key={list.id} list={list} />
+                  ),
+                )}
+                <CreateNewList />
+              </div>
+            </SortableContext>
+          </div>
+          {createPortal(
+            isListDraggable && (
+              <DragOverlay modifiers={[]} dropAnimation={dropAnimation}>
+                {activeList && <ListView list={activeList} />}
+              </DragOverlay>
+            ),
+            document.body,
+          )}
+          {createPortal(
+            isCardDraggable && (
+              <DragOverlay modifiers={[]} dropAnimation={dropAnimation}>
+                {activeCard && <TaskCard card={activeCard} position={-1} />}
+              </DragOverlay>
+            ),
+            document.body,
+          )}
+        </DndContext>
+      </div>
     </div>
   );
 };
+
+function CreateNewList(): JSX.Element {
+  const navigation = useNavigation();
+  const isSubmitting = navigation.state === "submitting";
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+
+  if (!isOpen) {
+    return (
+      <div className="flex px-4 hfit">
+        <div
+          onClick={(): void => setIsOpen(true)}
+          className="flex justify-center items-center min-w-80 flex-col rounded-lg border-2 bg-neutral-900/80 p-4 border-neutral-700 border-dashed hfit cursor-pointer text-sm text-neutral-400 hover:bg-neutral-900/60 h-fit"
+        >
+          Create New List
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <Form
+      method="post"
+      className="w-full h-screen flex flex-col justify-center items-center fixed top-0 left-0"
+    >
+      <ShadCard className="flex flex-col gap-4 border border-neutral-600 bg-neutral-900 text-neutral-100 p-6 w-1/2 h-fit max-w-sm fixed">
+        <h2 className="text-lg font-semibold">Create New List</h2>
+        <Input
+          name="title"
+          placeholder="Enter List title..."
+          autoFocus
+          required
+          className="bg-neutral-800 text-sm px-2 py-1 rounded outline-none border-neutral-400"
+        />
+        <Input
+          name="boardId"
+          hidden
+          defaultValue={`https://images.pexels.com/photos/13382071/pexels-photo-13382071.jpeg`}
+          className="bg-neutral-800 text-sm px-2 py-1 rounded outline-none border-neutral-400"
+        />
+        <div className="flex gap-2">
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="bg-indigo-500 hover:bg-indigo-600 px-3 py-1 rounded text-sm disabled:opacity-50"
+          >
+            {isSubmitting ? "Creating..." : "Create"}
+          </Button>
+
+          <Button
+            type="button"
+            variant={"ghost"}
+            onClick={(): void => setIsOpen(false)}
+          >
+            Cancel
+          </Button>
+        </div>
+      </ShadCard>
+    </Form>
+  );
+}
 
 export default BoardView;

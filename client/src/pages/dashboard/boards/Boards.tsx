@@ -36,7 +36,7 @@ const Boards = (): JSX.Element => {
           <div className="flex flex-wrap gap-4 justify-center items-center">
             <Suspense
               fallback={
-                <div className="flex cursor-pointer flex-col rounded-md overflow-hidden border border-neutral-600 h-24 aspect-video overflow-y-auto justify-center items-center bg-neutral-700">
+                <div className="flex cursor-pointer flex-col rounded-md overflow-hidden border border-neutral-600 h-32 sm:h-40 aspect-video overflow-y-auto justify-center items-center bg-neutral-700">
                   Loading Boards...
                 </div>
               }
@@ -74,7 +74,7 @@ function CreateNewBoardForm(): JSX.Element | null {
     return (
       <div
         onClick={(): void => setIsOpen(true)}
-        className="flex cursor-pointer flex-col rounded-md overflow-hidden border border-neutral-600 h-24 aspect-video overflow-y-auto justify-center items-center bg-neutral-700"
+        className="flex cursor-pointer flex-col rounded-md overflow-hidden border border-neutral-600 h-32 sm:h-40 aspect-video overflow-y-auto justify-center items-center bg-neutral-700"
       >
         Create New Board
       </div>

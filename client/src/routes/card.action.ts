@@ -1,21 +1,27 @@
 import { api } from "@/lib/api/axios";
-import type { ApiResponse, List } from "@/types";
+import type { ApiResponse, Card } from "@/types";
 
-export const swapListsAction = async ({
+export const swapCardsAction = async ({
   request,
 }: {
   request: Request;
-}): Promise<List> => {
+}): Promise<Card> => {
   const formData = await request.formData();
 
-  const list1Id = formData.get("list1Id");
-  const list2Id = formData.get("list2Id");
-  const boardId = formData.get("boardId");
+  const cardId = formData.get("cardId");
+  const sourceListId = formData.get("sourceListId");
+  const destListId = formData.get("destListId");
+  const newPosition = formData.get("newPosition");
 
-  const res = await api.post<ApiResponse<List>>("/api/lists/swap", {
-    list1Id,
-    list2Id,
-    boardId,
+  if (!cardId || !sourceListId || !destListId || newPosition === null) {
+    throw new Response("Missing required fields", { status: 400 });
+  }
+
+  const res = await api.post<ApiResponse<Card>>("/api/cards/move", {
+    cardId,
+    sourceListId,
+    destListId,
+    newPosition: Number(newPosition),
   });
 
   if (!res.data.success) {
@@ -28,13 +34,13 @@ export const swapListsAction = async ({
   return res.data.data;
 };
 
-export const createListAction = async ({
+export const createCardAction = async ({
   request,
   params,
 }: {
   request: Request;
   params: { boardId?: string };
-}) => {
+}): Promise<Card> => {
   const formData = await request.formData();
 
   const title = formData.get("title");
@@ -44,8 +50,8 @@ export const createListAction = async ({
     throw new Response("Missing required fields", { status: 400 });
   }
 
-  const res = await api.post<ApiResponse<List>>(
-    "/api/lists",
+  const res = await api.post<ApiResponse<Card>>(
+    "/api/card",
     {
       title,
       boardId,

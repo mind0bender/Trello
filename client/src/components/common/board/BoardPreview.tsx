@@ -15,10 +15,9 @@ const BoardPreview = ({
   return (
     <Link
       to={`/boards/${id}`}
-      className="flex flex-col rounded-md overflow-hidden border border-neutral-600 h-24 aspect-video"
+      className="flex flex-col rounded-md overflow-hidden border border-neutral-600 h-32 sm:h-40 aspect-video"
     >
       <div className="bg-linear-45 from-fuchsia-400 to-violet-400 flex grow relative">
-        {background + "lol"}
         <img
           src={background}
           alt="board background"

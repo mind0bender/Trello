@@ -1,5 +1,5 @@
 import type { Board } from "@/types";
-import { api } from "../libs/api/axios";
+import { api } from "../lib/api/axios";
 import type { AxiosResponse } from "axios";
 
 export const boardsLoader = (): { boards: Promise<Board[]> } => {
