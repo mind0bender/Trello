@@ -24,6 +24,7 @@ import { Card as ShadCard } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { TaskCard } from "../task/Task";
+import { Cross, X } from "lucide-react";
 
 const BoardView = ({ board }: { board: BoardFull }): JSX.Element => {
   const [lists, setLists] = useState<ListWithCards[]>(board.lists);
@@ -135,8 +136,6 @@ const BoardView = ({ board }: { board: BoardFull }): JSX.Element => {
               ? over.data.current?.position - 1
               : over.data.current?.list.cards.length,
         };
-
-        console.table({ over, destination });
 
         setLists((prev: ListWithCards[]): ListWithCards[] => {
           const sourceListIndex = prev.findIndex(
@@ -250,7 +249,7 @@ const BoardView = ({ board }: { board: BoardFull }): JSX.Element => {
                     <ListView key={list.id} list={list} />
                   ),
                 )}
-                <CreateNewList />
+                <CreateNewList boardId={board.id} />
               </div>
             </SortableContext>
           </div>
@@ -276,7 +275,11 @@ const BoardView = ({ board }: { board: BoardFull }): JSX.Element => {
   );
 };
 
-function CreateNewList(): JSX.Element {
+interface CreateNewListProps {
+  boardId: string;
+}
+
+function CreateNewList({ boardId }: CreateNewListProps): JSX.Element {
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -286,7 +289,7 @@ function CreateNewList(): JSX.Element {
       <div className="flex px-4 hfit">
         <div
           onClick={(): void => setIsOpen(true)}
-          className="flex justify-center items-center min-w-80 flex-col rounded-lg border-2 bg-neutral-900/80 p-4 border-neutral-700 border-dashed hfit cursor-pointer text-sm text-neutral-400 hover:bg-neutral-900/60 h-fit"
+          className="flex justify-center items-center min-w-80 flex-col rounded-lg bg-neutral-50/30 text-neutral-50 p-4 cursor-pointer text-sm font-semibold hover:bg-neutral-50/20 h-fit duration-200"
         >
           Create New List
         </div>
@@ -296,42 +299,31 @@ function CreateNewList(): JSX.Element {
 
   return (
     <Form
-      method="post"
-      className="w-full h-screen flex flex-col justify-center items-center fixed top-0 left-0"
+      method="POST"
+      className="flex justify-center items-start gap-2 min-w-80 flex-col rounded-lg bg-neutral-900/80 text-neutral-50 p-4 cursor-pointer text-sm font-semibold hover:bg-neutral-50/20 h-fit duration-200"
     >
-      <ShadCard className="flex flex-col gap-4 border border-neutral-600 bg-neutral-900 text-neutral-100 p-6 w-1/2 h-fit max-w-sm fixed">
-        <h2 className="text-lg font-semibold">Create New List</h2>
-        <Input
-          name="title"
-          placeholder="Enter List title..."
-          autoFocus
-          required
-          className="bg-neutral-800 text-sm px-2 py-1 rounded outline-none border-neutral-400"
-        />
-        <Input
-          name="boardId"
-          hidden
-          defaultValue={`https://images.pexels.com/photos/13382071/pexels-photo-13382071.jpeg`}
-          className="bg-neutral-800 text-sm px-2 py-1 rounded outline-none border-neutral-400"
-        />
-        <div className="flex gap-2">
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className="bg-indigo-500 hover:bg-indigo-600 px-3 py-1 rounded text-sm disabled:opacity-50"
-          >
-            {isSubmitting ? "Creating..." : "Create"}
-          </Button>
+      <Input
+        onClick={(): void => setIsOpen(true)}
+        placeholder="Enter List name..."
+      />
+      <Input name="boardId" hidden defaultValue={boardId} />
+      <div className="flex gap-2">
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          className="bg-indigo-400 hover:bg-indigo-600 px-3 py-1 rounded text-sm disabled:opacity-50 text-neutral-900"
+        >
+          {isSubmitting ? "Adding..." : "Add List"}
+        </Button>
 
-          <Button
-            type="button"
-            variant={"ghost"}
-            onClick={(): void => setIsOpen(false)}
-          >
-            Cancel
-          </Button>
-        </div>
-      </ShadCard>
+        <Button
+          type="button"
+          variant={"ghost"}
+          onClick={(): void => setIsOpen(false)}
+        >
+          <X />
+        </Button>
+      </div>
     </Form>
   );
 }
