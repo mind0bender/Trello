@@ -20,11 +20,10 @@ import {
   horizontalListSortingStrategy,
   SortableContext,
 } from "@dnd-kit/sortable";
-import { Card as ShadCard } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { TaskCard } from "../task/Task";
-import { Cross, X } from "lucide-react";
+import { X } from "lucide-react";
 
 const BoardView = ({ board }: { board: BoardFull }): JSX.Element => {
   const [lists, setLists] = useState<ListWithCards[]>(board.lists);

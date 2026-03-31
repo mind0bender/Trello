@@ -8,15 +8,7 @@ import {
 import type { Card, ListWithCards } from "@/types";
 import { TaskCard } from "../task/Task";
 import { CSS } from "@dnd-kit/utilities";
-import {
-  Delete,
-  Grab,
-  GripVertical,
-  Plus,
-  Trash,
-  Trash2,
-  X,
-} from "lucide-react";
+import { Grab, GripVertical, Plus, Trash2, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Form, useNavigation } from "react-router";
 import { Button } from "@/components/ui/button";
@@ -145,6 +137,7 @@ const CreateNewCard = ({ listId }: CreateNewCardProps): JSX.Element => {
         <Button
           variant={"secondary"}
           className="bg-blue-400 rounded-sm px-4 py-4 cursor-pointer"
+          disabled={isSubmitting}
         >
           Add Card
         </Button>
